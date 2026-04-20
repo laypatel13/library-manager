@@ -44,7 +44,17 @@ class Library:
             book.display()
 
     def save(self):
-        pass
+        books_data = []
+        for book in self.books:
+            book_dict = {
+                "title": book.title,
+                "author": book.author,
+                "year": book.year,
+                "is_read": book.is_read
+            }
+            books_data.append(book_dict)
+        with open("books.json", "w") as f:
+            json.dump(books_data, f)
 
     def load(self):  # To load the json file in a list to handle them
         if os.path.exists("books.json"):
