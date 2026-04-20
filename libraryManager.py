@@ -28,7 +28,12 @@ class Library:
         print("Book added!")
 
     def view_books(self):
-        pass
+        if not self.books:
+            print("No books in library!")
+            return
+        for index, book in enumerate(self.books, start=1):
+            print(f'{index}.', end=' ')
+            book.display()
 
     def view_unread(self):
         pass
