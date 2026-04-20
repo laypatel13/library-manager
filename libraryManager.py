@@ -67,3 +67,7 @@ class Library:
                     book = Book(book_dict["title"], book_dict["author"], book_dict["year"])
                     book.is_read = book_dict["is_read"]
                     self.books.append(book)
+
+def main():
+    library = Library()     # create a Library object
+    library.load()          # load books from file
