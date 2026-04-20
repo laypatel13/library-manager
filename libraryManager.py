@@ -16,4 +16,20 @@ class Book:
         self.is_read = True
 
 class Library:
-    pass
+    def __init__(self):
+        self.books = []
+
+    def add_book(self):
+        pass
+
+    def view_books(self):
+        pass
+
+    def view_unread(self):
+        pass
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
