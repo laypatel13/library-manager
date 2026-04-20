@@ -10,7 +10,7 @@ class Book:
 
     def display(self):
         status = "Read" if self.is_read else "Unread"  # Display the list of Books.
-        print(f'Title: {self.title} | Author: {self.author} | Year: {self.year}')
+        print(f'Title: {self.title} | Author: {self.author} | Year: {self.year} | status: {status}')
 
     def mark_as_read(self):  # To change status of book
         self.is_read = True
@@ -43,7 +43,7 @@ class Library:
             print(f'{index}.', end=' ')
             book.display()
 
-    def save(self):
+    def save(self): # To add or dump data in json file
         books_data = []
         for book in self.books:
             book_dict = {
