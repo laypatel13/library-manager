@@ -84,7 +84,7 @@ def main():
 
         if choice == "1":
             library.add_book()
-            library.save()
+            library.save() # Handled save function by calling it no need to save sapratly.
         elif choice == "2":
             library.view_books()
         elif choice == "3":
