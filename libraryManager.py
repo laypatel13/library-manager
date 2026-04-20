@@ -20,7 +20,12 @@ class Library:
         self.books = []
 
     def add_book(self):
-        pass
+        title = input("Enter the title of the Book: ")
+        author = input("Enter the author of the Book: ")
+        year = input("Enter the year of the Book: ")
+        book = Book(title, author, year)
+        self.books.append(book)
+        print("Book added!")
 
     def view_books(self):
         pass
