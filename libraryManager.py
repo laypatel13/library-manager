@@ -71,3 +71,30 @@ class Library:
 def main():
     library = Library()     # create a Library object
     library.load()          # load books from file
+
+    while True:
+        print("\n--- Library Manager ---")
+        print("1. Add book")
+        print("2. View all books")
+        print("3. View unread books")
+        print("4. Mark book as read")
+        print("5. Quit")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            library.add_book()
+            library.save()
+        elif choice == "2":
+            library.view_books()
+        elif choice == "3":
+            library.view_unread()
+        elif choice == "4":
+            index_num = int(input("Enter the index number of the Book: ")) - 1
+            library.books[index_num].mark_as_read()
+            library.save()
+        elif choice == "5":
+            print("Bye...!")
+            break
+        else:
+            print("Invalid Choice😅")
