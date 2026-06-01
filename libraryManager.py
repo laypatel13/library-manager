@@ -1,103 +1,182 @@
 import json
 import os
+from colorama import init, Fore, Back, Style
+from tabulate import tabulate
 
-class Book:
-    def __init__(self, title, author, year):
-        self.title = title
-        self.author = author
-        self.year = year
-        self.is_read = False
+init(autoreset=True)
 
-    def display(self):
-        status = "Read" if self.is_read else "Unread"  # Display the list of Books.
-        print(f'Title: {self.title} | Author: {self.author} | Year: {self.year} | status: {status}')
+books = []
 
-    def mark_as_read(self):  # To change status of book
-        self.is_read = True
 
-class Library:
-    def __init__(self):
-        self.books = []
-
-    def add_book(self):  # To add Book to list
-        title = input("Enter the title of the Book: ")
-        author = input("Enter the author of the Book: ")
-        year = input("Enter the year of the Book: ")
-        book = Book(title, author, year)
-        self.books.append(book)
-        print("Book added!")
-
-    def view_books(self):  # to read the book list
-        if not self.books:
-            print("No books in library!")
-            return
-        for index, book in enumerate(self.books, start=1):
-            print(f'{index}.', end=' ')
-            book.display()
-
-    def view_unread(self):  # To read only inread books by fetching them into a seprate list
-        if not self.books:
-            print("No books in library!")
-            return
-        for index, book in enumerate(self.books, start=1):
-            print(f'{index}.', end=' ')
-            book.display()
-
-    def save(self): # To add or dump data in json file
-        books_data = []
-        for book in self.books:
-            book_dict = {
-                "title": book.title,
-                "author": book.author,
-                "year": book.year,
-                "is_read": book.is_read
-            }
-            books_data.append(book_dict)
-        with open("books.json", "w") as f:
-            json.dump(books_data, f)
-
-    def load(self):  # To load the json file in a list to handle them
-        if os.path.exists("books.json"):
+def load_books():
+    if os.path.exists("books.json"):
+        try:
             with open("books.json", "r") as f:
                 content = f.read()
                 if content.strip() == "":
-                    return
-                books_data = json.loads(content)
-                for book_dict in books_data:
-                    book = Book(book_dict["title"], book_dict["author"], book_dict["year"])
-                    book.is_read = book_dict["is_read"]
-                    self.books.append(book)
+                    return []
+                return json.loads(content)
+        except (json.JSONDecodeError, IOError) as e:
+            print(Fore.WHITE + Back.RED + f"Fatal Error: Failed To Load Books. {e}" + Style.RESET_ALL)
+            return []
+    return []
+
+
+def save_books():
+    try:
+        with open("books.json", "w") as f:
+            json.dump(books, f)
+    except IOError as e:
+        print(Fore.WHITE + Back.RED + f"Fatal Error: Failed To Save Books. {e}" + Style.RESET_ALL)
+
+
+def add_book():
+    while True:
+        title = input(
+            Fore.WHITE + Style.NORMAL + "Enter Book Title (or 'quit' to finish): " + Style.RESET_ALL)
+        if title.lower() == "quit":
+            break
+        author = input(Fore.WHITE + Style.NORMAL + "Enter Author Name: " + Style.RESET_ALL)
+
+        year = input(Fore.WHITE + Style.NORMAL + "Enter Publication Year: " + Style.RESET_ALL)
+
+        new_book = {
+            "title": title,
+            "author": author,
+            "year": year,
+            "is_read": False
+        }
+
+        books.append(new_book)
+
+        print(Fore.GREEN + Back.BLACK + Style.BRIGHT + "Book Added Successfully!" + Style.RESET_ALL + "\n")
+
+
+def view_books():
+    if not books:
+        print(Fore.WHITE + Back.BLACK + Style.BRIGHT + "No Books In Library." + Style.RESET_ALL)
+        return
+
+    print("\n" + Fore.BLACK + Back.WHITE + "--- Library Books ---" + Style.RESET_ALL)
+
+    table_data = []
+
+    for index, book in enumerate(books, start=1):
+
+        status = "Read" if book["is_read"] else "Unread"
+
+        table_data.append([index, book["title"], book["author"], book["year"], status])
+
+    headers = ["Index", "Title", "Author", "Year", "Status"]
+
+    print(tabulate(table_data, headers=headers, tablefmt="pretty", disable_numparse=True))
+
+
+def view_unread_books():
+    unread_books = []
+
+    for book in books:
+        if not book["is_read"]:
+            unread_books.append(book)
+
+    if not unread_books:
+        print(Fore.WHITE + Back.BLACK + Style.BRIGHT + "No Unread Books Found." + Style.RESET_ALL)
+        return
+
+    print("\n" + Fore.BLACK + Back.WHITE + "--- Unread Books ---" + Style.RESET_ALL)
+
+    table_data = []
+
+    for index, book in enumerate(unread_books, start=1):
+        table_data.append([index, book["title"], book["author"], book["year"]])
+
+    headers = ["Index", "Title", "Author", "Year"]
+
+    print(tabulate(table_data, headers=headers, tablefmt="pretty", disable_numparse=True))
+
+
+def mark_book_as_read():
+    if not books:
+        print(Fore.WHITE + Back.BLACK + Style.BRIGHT + "No Books Available." + Style.RESET_ALL)
+        return
+
+    view_books()
+
+    try:
+        index_num = int(
+            input("\n" + Fore.CYAN + Style.BRIGHT + "Enter Book Index To Mark As Read: " + Style.RESET_ALL))
+
+        if index_num < 1 or index_num > len(books):
+            print(Fore.RED + Style.BRIGHT + "Invalid Index!" + Style.RESET_ALL)
+            return
+
+        books[index_num - 1]["is_read"] = True
+
+        save_books()
+
+        print(Fore.GREEN + Back.BLACK + Style.BRIGHT + "Book Marked As Read!" + Style.RESET_ALL)
+
+    except ValueError:
+        print(Fore.RED + Style.BRIGHT + "Please Enter A Valid Number." + Style.RESET_ALL)
+
+
+def reset_library():
+    global books
+
+    confirm = input(Fore.RED + Style.BRIGHT + "Are You Sure You Want To Delete All Books? (yes/no): " + Style.RESET_ALL
+    )
+
+    if confirm.lower() == "yes":
+        books = []
+        save_books()
+
+        print(Fore.GREEN + Back.BLACK + "Library Reset Successfully!" + Style.RESET_ALL)
+
+    else:
+        print(Fore.RED + "Reset Cancelled." + Style.RESET_ALL)
+
 
 def main():
-    library = Library()     # create a Library object
-    library.load()          # load books from file
+    global books
+
+    books = load_books()
 
     while True:
-        print("\n--- Library Manager ---")
-        print("1. Add book")
-        print("2. View all books")
-        print("3. View unread books")
-        print("4. Mark book as read")
-        print("5. Quit")
 
-        choice = input("Enter choice: ")
+        print("\n" +  Fore.BLACK + Back.WHITE + "--- Library Manager ---" + Style.RESET_ALL)
+
+        print(Fore.YELLOW + "(1) Add New Book" + Style.RESET_ALL)
+        print(Fore.YELLOW + "(2) View All Books" + Style.RESET_ALL)
+        print(Fore.YELLOW + "(3) View Unread Books" + Style.RESET_ALL)
+        print(Fore.YELLOW + "(4) Mark Book As Read" + Style.RESET_ALL)
+        print(Fore.YELLOW + "(5) Quit Library Manager" + Style.RESET_ALL)
+        print(Fore.YELLOW + "(6) Reset Library" + Style.RESET_ALL)
+
+        choice = input("\n" + Fore.CYAN + Style.BRIGHT + "Enter Your Choice: " + Style.RESET_ALL)
 
         if choice == "1":
-            library.add_book()
-            library.save() # Handled save function by calling it no need to save sapratly.
+            add_book()
+            save_books()
+
         elif choice == "2":
-            library.view_books()
+            view_books()
+
         elif choice == "3":
-            library.view_unread()
+            view_unread_books()
+
         elif choice == "4":
-            index_num = int(input("Enter the index number of the Book: ")) - 1
-            library.books[index_num].mark_as_read()
-            library.save()
+            mark_book_as_read()
+
         elif choice == "5":
-            print("Bye...!")
+            print(Fore.WHITE + Style.BRIGHT + "Bye! Thanks For Using The Library Manager!" + Style.RESET_ALL)
             break
+
+        elif choice == "6":
+            reset_library()
+
         else:
-            print("Invalid Choice😅")
+            print(Fore.RED + Style.BRIGHT + "Invalid Choice, Try Again!" + Style.RESET_ALL)
 
 
-main()
+if __name__ == "__main__":
+    main()
