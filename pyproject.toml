@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lay-library-manager"
-version = "0.1.0"
+version = "0.1.1"
 description = "A colorful CLI library manager for tracking books and reading progress"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 
 authors = [
-{name = "Lay Patel", email = "[lay.patel.1313@gmail.com](mailto:lay.patel.1313@gmail.com)"}
+{name = "Lay Patel", email = "lay.patel.1313@gmail.com"}
 ]
 
 keywords = [
